@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrderDto {
     private UUID id;
-    private List<ItemDto> items;
+    private ItemDto itemDto;
 
     private OrderStatus status;
 }

@@ -1,6 +1,6 @@
-package com.github.amitsureshchandra.orderservice.advice;
+package com.github.amitsureshchandra.catalogservice.advice;
 
-import com.github.amitsureshchandra.orderservice.exception.ValidationException;
+import com.github.amitsureshchandra.catalogservice.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,6 +1,7 @@
 package com.github.amitsureshchandra.catalogservice.service;
 
 import com.github.amitsureshchandra.catalogservice.enums.StockUpdateEnum;
+import com.github.amitsureshchandra.catalogservice.exception.ValidationException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -25,12 +26,12 @@ public class CatalogService {
             map.put(prodId, map.getOrDefault(prodId, 0) + quantity);
             return;
         }
-        if(map.containsKey(prodId) && map.get(prodId) > quantity)
+        if(map.containsKey(prodId) && map.get(prodId) >= quantity)
         {
             map.put(prodId, map.get(prodId) - quantity);
             return;
         }
 
-        throw new RuntimeException("not enough stock");
+        throw new ValidationException("not enough stock");
     }
 }

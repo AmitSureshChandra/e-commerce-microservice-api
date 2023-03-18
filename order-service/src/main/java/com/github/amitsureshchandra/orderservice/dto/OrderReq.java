@@ -1,14 +1,14 @@
 package com.github.amitsureshchandra.orderservice.dto;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
 public class OrderReq {
-    @NotEmpty
-    private List<ItemDto> items;
+
+    @NotNull
+    ItemDto item;
 }
