@@ -27,11 +27,11 @@ public class AccountTransactionListener {
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleEventBeforeCommit(AccountTransactionEvent event) throws InterruptedException, AccountProcessingException {
-        eventBus.sendEvents(event);
+        eventBus.addEvent(event);
         DistributedTransaction transaction = null;
 
         for (int i = 0; i < 100; i++) {
-            transaction = eventBus.receiveTransaction(event.getTransactionId());
+            transaction = eventBus.removeTransaction(event.getTransactionId());
             if(transaction == null) {
                 Thread.sleep(100);
             }else break;
@@ -43,13 +43,13 @@ public class AccountTransactionListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
     public void handleAfterRollback(AccountTransactionEvent event){
-        restTemplate.put(transactionServerUrl + "/api/v1/transactions/{transactionId}/participants/{serviceId}/status/{status}",
-                null, event.getTransactionId(),"account-service", "TO_ROLLBACK");
+        restTemplate.put("http://transaction-service/transactions/api/v1/transactions/"+ event.getTransactionId()+"/participants/account-service/TO_ROLLBACK", null);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
     public void handleAfterCompletion(AccountTransactionEvent event){
-        restTemplate.put(transactionServerUrl + "/api/v1/transactions/{transactionId}/participants/{serviceId}/status/{status}",
-                null, event.getTransactionId(),"account-service", "CONFIRM");
+        restTemplate.put(
+                "http://transaction-service/transactions/api/v1/transactions/"+event.getTransactionId()+"/participants/account-service/CONFIRMED"
+                , null);
     }
 }

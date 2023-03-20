@@ -3,18 +3,25 @@ package com.github.amitsureshchandra.catalogservice.controller;
 import com.github.amitsureshchandra.catalogservice.enums.StockUpdateEnum;
 import com.github.amitsureshchandra.catalogservice.service.CatalogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/catalogs")
+@EnableDiscoveryClient
 public class CatalogController {
 
     private final CatalogService catalogService;
 
     public CatalogController(CatalogService catalogService) {
         this.catalogService = catalogService;
+    }
+
+    @GetMapping
+    String ping(){
+        return "pong";
     }
 
     @GetMapping("/{prodId}")

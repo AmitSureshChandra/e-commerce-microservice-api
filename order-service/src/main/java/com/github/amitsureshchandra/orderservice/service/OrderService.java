@@ -8,7 +8,6 @@ import com.github.amitsureshchandra.orderservice.enums.OrderStatus;
 import com.github.amitsureshchandra.orderservice.events.AccountTransactionEvent;
 import com.github.amitsureshchandra.orderservice.exception.OrderProcessingException;
 import com.github.amitsureshchandra.orderservice.exception.ValidationException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,18 +25,6 @@ import java.util.UUID;
 @Service
 public class OrderService {
     final RestTemplate restTemplate;
-
-    @Value("${transactions.service.url}")
-    String transactionUrl;
-
-    @Value("${catalogs.service.url}")
-    String catalogServiceUrl;
-
-    @Value("${products.service.url}")
-    String productServiceUrl;
-
-    @Value("${accounts.service.url}")
-    String accountServiceUrl;
 
     private UUID buyerUserId = UUID.fromString("f0a28cb4-175b-436b-92e1-1e937736e616");
 
@@ -61,7 +48,7 @@ public class OrderService {
         // pending
 
         //create distributed transaction
-        DistributedTransaction transaction = restTemplate.postForObject(transactionUrl + "/api/v1/transactions",
+        DistributedTransaction transaction = restTemplate.postForObject("http://transaction-service/transactions/api/v1/transactions",
                new DistributedTransaction(), DistributedTransaction.class);
 
         System.out.println(transaction);
@@ -91,14 +78,14 @@ public class OrderService {
 
     private boolean decrementAmount(OrderReq orderReq, DistributedTransaction transaction, UUID orderId) {
         System.out.println(" orderReq.getItem().getItemId() : " +  orderReq.getItem().getItemId());
-        ProductDto product = restTemplate.getForEntity(productServiceUrl + "/api/v1/products/"+ orderReq.getItem().getItemId(), ProductDto.class).getBody();
+        ProductDto product = restTemplate.getForEntity("http://product-service/products/api/v1/products/"+ orderReq.getItem().getItemId(), ProductDto.class).getBody();
         assert product != null;
         double cost = product.getPrice() * orderReq.getItem().getQuantity();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Transaction-ID", transaction.getId());
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
-        System.out.println(accountServiceUrl+"/api/v1/users/" + buyerUserId+ "/payment/"+ (int)cost);
-        restTemplate.exchange(accountServiceUrl+"/api/v1/users/" + buyerUserId+ "/payment/"+ (int)cost, HttpMethod.PUT, httpEntity,Void.class);
+        System.out.println("http://account-service/users/api/v1/users/" + buyerUserId+ "/payment/"+ (int)cost);
+        restTemplate.exchange("http://account-service/users/api/v1/users/" + buyerUserId+ "/payment/"+ (int)cost, HttpMethod.PUT, httpEntity,Void.class);
         return true;
     }
 
@@ -120,7 +107,7 @@ public class OrderService {
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
         try{
-            ResponseEntity<Void> res = restTemplate.exchange(catalogServiceUrl + "/api/v1/catalogs/" + orderReq.getItem().getItemId()+"/DECR/" + orderReq.getItem().getQuantity(), HttpMethod.PUT, httpEntity, Void.class);
+            ResponseEntity<Void> res = restTemplate.exchange("http://catalog-service/catalogs/api/v1/catalogs/" + orderReq.getItem().getItemId()+"/DECR/" + orderReq.getItem().getQuantity(), HttpMethod.PUT, httpEntity, Void.class);
             if(!res.getStatusCode().is2xxSuccessful()) return false;
         }catch (RestClientException exception) {
             System.out.println(exception.getMessage());
@@ -131,7 +118,7 @@ public class OrderService {
 
     private boolean inStock(OrderReq orderReq) {
         ResponseEntity<Integer> resp = restTemplate.exchange(
-                catalogServiceUrl + "/api/v1/catalogs/" + orderReq.getItem().getItemId(),
+                "http://catalog-service/catalogs/api/v1/catalogs/" + orderReq.getItem().getItemId(),
                 HttpMethod.GET,
                 null,
                 Integer.class

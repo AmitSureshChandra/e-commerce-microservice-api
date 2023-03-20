@@ -60,4 +60,8 @@ public class TransactionService {
             }
         }
     }
+
+    public Object getAll() {
+        return transactions;
+    }
 }

@@ -20,6 +20,7 @@ public class DistributedTransactionEventListener {
 
     @RabbitListener(bindings = @QueueBinding(exchange = @Exchange(type = ExchangeTypes.TOPIC, name = "trx-events"), value = @Queue("trx-events-account")))
     public void onMessage(DistributedTransaction transaction){
-        eventBus.sendTransaction(transaction);
+        System.out.println("Got message : " + transaction);
+        eventBus.addTransaction(transaction);
     }
 }

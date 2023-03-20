@@ -4,21 +4,25 @@ import com.github.amitsureshchandra.accountservice.events.AccountTransactionEven
 import com.github.amitsureshchandra.accountservice.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Async
 public class UserService {
-
-    @Autowired
-    ApplicationEventPublisher eventPublisher;
+    final ApplicationEventPublisher eventPublisher;
 
     Map<String, UserDto> users = new HashMap<String, UserDto>(){{
         put("920245ce-21e8-4e3b-8055-dc104fd5c0c8", new UserDto("seller", 0d));
         put("f0a28cb4-175b-436b-92e1-1e937736e616", new UserDto("buyer", 1000d));
     }};
+
+    public UserService(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     public UserDto findById(String userId) {
         return users.get(userId);

@@ -11,12 +11,14 @@
         <module name="order-service" />
         <module name="account-service" />
         <module name="transaction-server" />
+        <module name="discovery-service" />
         <module name="catalog-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="account-service" target="1.8" />
       <module name="catalog-service" target="16" />
+      <module name="discovery-service" target="1.8" />
       <module name="order-service" target="16" />
       <module name="product-service" target="16" />
       <module name="transaction-server" target="1.8" />
@@ -26,6 +28,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="account-service" options="-parameters" />
       <module name="catalog-service" options="-parameters" />
+      <module name="discovery-service" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
       <module name="transaction-server" options="-parameters" />

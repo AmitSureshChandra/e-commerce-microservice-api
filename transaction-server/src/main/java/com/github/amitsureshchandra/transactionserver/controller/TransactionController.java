@@ -4,12 +4,14 @@ import com.github.amitsureshchandra.transactionserver.dto.DistributedTransaction
 import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionParticipant;
 import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.transactionserver.service.TransactionService;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
+@EnableDiscoveryClient
 class TransactionController{
     private final TransactionService transactionService;
 
@@ -20,6 +22,11 @@ class TransactionController{
     @PostMapping
     public DistributedTransaction add(@RequestBody DistributedTransaction transaction) {
         return transactionService.add(transaction);
+    }
+
+    @GetMapping
+    public Object getAll(){
+        return transactionService.getAll();
     }
 
     @GetMapping("/{tid}")

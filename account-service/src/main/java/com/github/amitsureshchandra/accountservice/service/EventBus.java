@@ -12,19 +12,19 @@ public class EventBus {
     private final Map<String, DistributedTransaction> transactions = new HashMap<>();
     private final Map<String, AccountTransactionEvent> events = new HashMap<>();
 
-    public void sendTransaction(DistributedTransaction transaction){
+    public void addTransaction(DistributedTransaction transaction){
         transactions.put(transaction.getId(), transaction);
     }
 
-    public DistributedTransaction receiveTransaction(String transactionId){
+    public DistributedTransaction removeTransaction(String transactionId){
         return transactions.remove(transactionId);
     }
 
-    public void sendEvents(AccountTransactionEvent event) {
+    public void addEvent(AccountTransactionEvent event) {
         events.put(event.getTransactionId(), event);
     }
 
-    public AccountTransactionEvent receiveEvent(String eventId){
+    public AccountTransactionEvent removeEvent(String eventId){
         return events.remove(eventId);
     }
 }
