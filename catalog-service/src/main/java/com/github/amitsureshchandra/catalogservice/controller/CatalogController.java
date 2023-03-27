@@ -24,13 +24,18 @@ public class CatalogController {
         return "pong";
     }
 
+    @PostMapping("/{prodId}/{quantity}")
+    void addStock(@PathVariable Long prodId, @PathVariable Long quantity) {
+        catalogService.addStock(prodId, quantity);
+    }
+
     @GetMapping("/{prodId}")
-    Integer getStock(@PathVariable UUID prodId){
-        return catalogService.getStock(prodId);
+    Integer getStock(@PathVariable Long prodId){
+        return catalogService.getStock(prodId).intValue();
     }
 
     @PutMapping("/{prodId}/{type}/{quantity}")
-    void updateStock(@PathVariable UUID prodId, @PathVariable StockUpdateEnum type,@PathVariable Integer quantity ){
+    void updateStock(@PathVariable Long prodId, @PathVariable StockUpdateEnum type,@PathVariable Integer quantity ){
         catalogService.updateStock(prodId, type, quantity);
     }
 }

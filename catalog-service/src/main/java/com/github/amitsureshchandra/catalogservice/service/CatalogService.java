@@ -1,37 +1,55 @@
 package com.github.amitsureshchandra.catalogservice.service;
 
+import com.github.amitsureshchandra.catalogservice.entity.ProductStock;
 import com.github.amitsureshchandra.catalogservice.enums.StockUpdateEnum;
 import com.github.amitsureshchandra.catalogservice.exception.ValidationException;
+import com.github.amitsureshchandra.catalogservice.repo.PsRepo;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class CatalogService {
-    Map<UUID, Integer> map = new HashMap<>(){
-        {
-            put(UUID.fromString("e0138992-6a06-4841-ba74-618f58d000e8"), 3);
-        }
-    };
+    final PsRepo psRepo;
 
-    public Integer getStock(UUID prodId) {
-        return map.getOrDefault(prodId ,0);
+    public CatalogService(PsRepo psRepo) {
+        this.psRepo = psRepo;
     }
 
-    public void updateStock(UUID prodId, StockUpdateEnum stockUpdateEnum, Integer quantity) {
+    public Long getStock(Long prodId) {
+        return psRepo.findQuantityByProductId(prodId);
+    }
+
+    ProductStock getPSByProdId(Long pid) {
+        return psRepo.findByProductId(pid);
+    }
+
+    public void updateStock(Long prodId, StockUpdateEnum stockUpdateEnum, Integer quantity) {
+        ProductStock ps = getPSByProdId(prodId);
         if(stockUpdateEnum == StockUpdateEnum.INCR) {
-            System.out.println(map.getOrDefault(prodId, 0));
-            map.put(prodId, map.getOrDefault(prodId, 0) + quantity);
+            ps.setQuantity(ps.getQuantity() + quantity);
+            psRepo.save(ps);
             return;
         }
-        if(map.containsKey(prodId) && map.get(prodId) >= quantity)
+        if(ps != null && ps.getQuantity() >= quantity)
         {
-            map.put(prodId, map.get(prodId) - quantity);
+            ps.setQuantity(ps.getQuantity() - quantity);
+            psRepo.save(ps);
             return;
         }
 
         throw new ValidationException("not enough stock");
+    }
+
+    public void addStock(Long prodId, Long quantity) {
+        // check if stock not exists
+
+        if(psRepo.existsByProductId(prodId)) throw new ValidationException("already exists");
+
+        // save
+        ProductStock ps = new ProductStock();
+        ps.setProductId(prodId);
+        ps.setQuantity(quantity);
+        psRepo.save(ps);
     }
 }
