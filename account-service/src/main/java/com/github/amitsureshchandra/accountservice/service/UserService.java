@@ -1,44 +1,65 @@
 package com.github.amitsureshchandra.accountservice.service;
 
-import com.github.amitsureshchandra.accountservice.events.AccountTransactionEvent;
+import com.github.amitsureshchandra.accountservice.dto.UserCreateDto;
 import com.github.amitsureshchandra.accountservice.dto.UserDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.amitsureshchandra.accountservice.dto.UserUpdateDto;
+import com.github.amitsureshchandra.accountservice.entity.User;
+import com.github.amitsureshchandra.accountservice.events.AccountTransactionEvent;
+import com.github.amitsureshchandra.accountservice.repo.UserRepo;
+import com.github.amitsureshchandra.commonfeature.service.feature.IBaseCRUService;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 @Async
-public class UserService {
+public class UserService implements IBaseCRUService<User, Long, UserCreateDto, UserUpdateDto> {
     final ApplicationEventPublisher eventPublisher;
+    final ApplicationContext applicationContext;
+    final UserRepo userRepo;
 
-    Map<String, UserDto> users = new HashMap<String, UserDto>(){{
-        put("920245ce-21e8-4e3b-8055-dc104fd5c0c8", new UserDto("seller", 0d));
-        put("f0a28cb4-175b-436b-92e1-1e937736e616", new UserDto("buyer", 1000d));
-    }};
-
-    public UserService(ApplicationEventPublisher eventPublisher) {
+    public UserService(ApplicationEventPublisher eventPublisher, ApplicationContext applicationContext, UserRepo userRepo) {
         this.eventPublisher = eventPublisher;
+        this.applicationContext = applicationContext;
+        this.userRepo = userRepo;
     }
 
-    public UserDto findById(String userId) {
-        return users.get(userId);
-    }
-
-    public void payment(String userId, Double amount, String transactionId) {
+    public void payment(Long userId, Double amount, String transactionId) {
         transfer(userId, amount, transactionId);
     }
 
-    public void withdraw(String userId, Double amount, String transactionId) {
+    public void withdraw(Long userId, Double amount, String transactionId) {
         transfer(userId, (-1) * amount, transactionId);
     }
 
-    private void transfer(String userId, Double amount, String transactionId){
-        UserDto userDto = findById(userId);
-        userDto.setBalance(userDto.getBalance() + amount);
-        eventPublisher.publishEvent(new AccountTransactionEvent(transactionId, userDto));
+    private void transfer(Long userId, Double amount, String transactionId){
+        User user = findById(userId);
+        user.setBalance(user.getBalance() + amount);
+        userRepo.save(user);
+        eventPublisher.publishEvent(new AccountTransactionEvent(transactionId, new UserDto(user)));
+    }
+
+    @Override
+    public ApplicationContext getAppContext() {
+        return applicationContext;
+    }
+
+    @Override
+    public User beforeUpdate(User entity, UserUpdateDto userUpdateDto) {
+
+        entity.setCity(userUpdateDto.getCity());
+        entity.setEmail(userUpdateDto.getEmail());
+        entity.setState(userUpdateDto.getState());
+        entity.setCountry(userUpdateDto.getCountry());
+        entity.setPincode(userUpdateDto.getPincode());
+
+        return userRepo.save(entity);
+    }
+
+    @Override
+    public JpaRepository<User, Long> getRepo() {
+        return userRepo;
     }
 }
