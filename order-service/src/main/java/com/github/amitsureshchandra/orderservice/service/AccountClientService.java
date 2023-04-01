@@ -18,11 +18,11 @@ public class AccountClientService {
         this.restTemplate = restTemplate;
     }
 
-    public boolean decrementAmount(OrderReq orderReq, DistributedTransaction transaction, ProductDto product, Double cost, Long buyerUserId) {
+    public boolean decrementAmount(OrderReq orderReq, Long transaction, ProductDto product, Double cost, Long buyerUserId) {
         System.out.println(" orderReq.getItem().getItemId() : " +  orderReq.getItem().getItemId());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Transaction-ID", transaction.getId());
+        headers.set("X-Transaction-ID", String.valueOf(transaction));
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
         System.out.println("http://account-service/users/api/v1/users/" + buyerUserId+ "/payment/"+ cost);
         restTemplate.exchange("http://account-service/users/api/v1/users/" + buyerUserId+ "/payment/"+ cost, HttpMethod.PUT, httpEntity,Void.class);

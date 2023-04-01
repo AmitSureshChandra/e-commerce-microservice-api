@@ -61,7 +61,7 @@ class TransactionController{
     }
 
     @PostMapping("/{tx_id}/coordinate")
-    public void coordinate(@PathVariable UUID tx_id) {
+    public void coordinate(@PathVariable Long tx_id) {
         coordinatorService.coordinate(tx_id);
     }
 }

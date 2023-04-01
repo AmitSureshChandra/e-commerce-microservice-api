@@ -3,6 +3,7 @@ package com.github.amitsureshchandra.orderservice.service;
 import com.github.amitsureshchandra.orderservice.dto.*;
 import com.github.amitsureshchandra.orderservice.entity.Order;
 import com.github.amitsureshchandra.orderservice.entity.OrderItem;
+import com.github.amitsureshchandra.orderservice.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.orderservice.enums.OrderStatus;
 import com.github.amitsureshchandra.orderservice.events.OrderTransactionEvent;
 import com.github.amitsureshchandra.orderservice.exception.ValidationException;
@@ -43,6 +44,7 @@ public class OrderService {
     }
 
     public OrderDto placeOrder(OrderReq orderReq) {
+        System.out.println("here");
 
         // verify item in stock
         if(!catalogClientService.checkStock(orderReq)) {
@@ -52,13 +54,19 @@ public class OrderService {
         // verify users has coins
         // pending
 
+        List<DistributedTransactionParticipantDto> participants = new ArrayList<>();
+        participants.add(new DistributedTransactionParticipantDto("account-service", DistributedTransactionStatus.NEW));
+        participants.add(new DistributedTransactionParticipantDto("catalog-service", DistributedTransactionStatus.NEW));
+
         //create distributed transaction
-        DistributedTransaction transaction = transactionClientService.createTransaction();
+        Long txId = transactionClientService.createTransaction(participants);
+
+        // add transaction to coordinate
+
+        transactionClientService.addCoordination(txId);
 
         // decrement stocks
-        assert transaction != null;
-
-        if(!catalogClientService.decrementStocks(orderReq, transaction)) {
+        if(!catalogClientService.decrementStocks(orderReq, txId)) {
             // rollback transaction
             throw new ValidationException("failed to process order");
         }
@@ -69,12 +77,12 @@ public class OrderService {
         double cost = product.getPrice() * orderReq.getItem().getQuantity();
 
         // deduct coins
-        if(!accountClientService.decrementAmount(orderReq, transaction, product, cost, buyerUserId)) {
+        if(!accountClientService.decrementAmount(orderReq, txId, product, cost, buyerUserId)) {
             // rollback transaction
             throw new ValidationException("failed to process order");
         }
 
-        applicationEventPublisher.publishEvent(new OrderTransactionEvent());
+//        applicationEventPublisher.publishEvent(new OrderTransactionEvent());
 
 //        if(new Random().nextInt() % 2 == 0)
 //            throw new OrderProcessingException("failed manually");

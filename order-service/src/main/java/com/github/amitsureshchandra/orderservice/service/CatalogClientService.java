@@ -35,9 +35,9 @@ public class CatalogClientService {
                 availableStock >= orderReq.getItem().getQuantity();
     }
 
-    public boolean decrementStocks(OrderReq orderReq, DistributedTransaction transaction) {
+    public boolean decrementStocks(OrderReq orderReq, Long transaction) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Transaction-ID", transaction.getId());
+        headers.set("X-Transaction-ID", String.valueOf(transaction));
 
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
