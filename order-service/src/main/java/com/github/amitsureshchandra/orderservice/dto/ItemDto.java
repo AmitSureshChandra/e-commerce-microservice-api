@@ -10,6 +10,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
-    private UUID itemId;
+    private Long itemId;
     private Integer quantity;
 }

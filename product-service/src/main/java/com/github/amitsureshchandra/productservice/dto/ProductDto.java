@@ -16,7 +16,7 @@ public class ProductDto {
     private String desc;
     private String category;
 
-    private UUID sellerId;
+    private Long sellerId;
     private Double price;
 
     public ProductDto(Product product){

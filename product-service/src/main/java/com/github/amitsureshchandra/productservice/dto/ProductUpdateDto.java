@@ -19,8 +19,8 @@ public class ProductUpdateDto {
     @NotNull @NotBlank
     private String category;
 
-    @NotNull @NotBlank
-    private UUID sellerId;
+    @NotNull
+    private Long sellerId;
 
     @Positive
     private Double price;

@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.util.UUID;
 
-@Data @NoArgsConstructor
+@Data @NoArgsConstructor(force = true)
 public class ProductCreateDto {
 
     @NotNull @NotBlank
@@ -18,8 +18,8 @@ public class ProductCreateDto {
     @NotNull @NotBlank
     private String category;
 
-    @NotNull @NotBlank
-    private UUID sellerId;
+    @NotNull
+    private Long sellerId;
 
     @Positive
     private Double price;

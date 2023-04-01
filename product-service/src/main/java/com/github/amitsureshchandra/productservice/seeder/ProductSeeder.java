@@ -28,7 +28,7 @@ public class ProductSeeder {
                 "Asus Laptop",
                 "Intel i3 12th gen, 1220p processor, 512 SSD, 8 GB ram",
                 "laptop",
-                UUID.fromString("920245ce-21e8-4e3b-8055-dc104fd5c0c8"),
+                1l,
                 15d
         );
 
