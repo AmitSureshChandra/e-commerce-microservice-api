@@ -1,67 +1,93 @@
 package com.github.amitsureshchandra.transactionserver.service;
 
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransaction;
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionParticipant;
+import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionListDto;
+import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionParticipantDto;
+import com.github.amitsureshchandra.transactionserver.entity.DistributedTrx;
+import com.github.amitsureshchandra.transactionserver.entity.DistributedTrxParticipant;
 import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
+import com.github.amitsureshchandra.transactionserver.exception.ValidationException;
+import com.github.amitsureshchandra.transactionserver.projection.CountByTrxAndStatusProjection;
+import com.github.amitsureshchandra.transactionserver.repo.DTrxParticipantRepo;
+import com.github.amitsureshchandra.transactionserver.repo.TrxRepo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
+    final TrxRepo trxRepo;
+    final DTrxParticipantRepo participantRepo;
 
     @Value("${transaction-event-topic}")
     private String trxTopic;
+
     final
     RabbitTemplate rabbitTemplate;
-    Map<String, DistributedTransaction> transactions = new HashMap<>();
+    Map<String, DistributedTransactionListDto> transactions = new HashMap<>();
 
-    public TransactionService(RabbitTemplate rabbitTemplate) {
+    public TransactionService(TrxRepo trxRepo, DTrxParticipantRepo participantRepo, RabbitTemplate rabbitTemplate) {
+        this.trxRepo = trxRepo;
+        this.participantRepo = participantRepo;
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public DistributedTransaction add(DistributedTransaction transaction) {
-        String tid = UUID.randomUUID().toString();
-        transaction.setId(tid);
-        transactions.put(tid, transaction);
-        return transactions.get(tid);
+    public Long create(List<DistributedTransactionParticipantDto> participants) {
+        DistributedTrx trx = new DistributedTrx();
+        trx.setStatus(DistributedTransactionStatus.NEW);
+        trx.addParticipants(
+                participants.stream().map(
+                        p -> new DistributedTrxParticipant(p.getServiceId(), p.getStatus())
+                ).collect(Collectors.toList())
+        );
+        return trxRepo.save(trx).getId();
     }
 
-    public DistributedTransaction findById(String tid) {
-        return transactions.get(tid);
+    public DistributedTrx findById(Long tid) {
+        return trxRepo.findById(tid).orElseThrow(() -> new ValidationException("not found by given id : " + tid));
     }
 
-    public void finish(String tid, DistributedTransactionStatus status) {
-        DistributedTransaction transaction = findById(tid);
-        if (transaction != null) {
-            transaction.setStatus(status);
-            rabbitTemplate.convertAndSend(trxTopic, transaction);
-        }
+    public void finish(Long tid, DistributedTransactionStatus status) {
+        DistributedTrx transaction = findById(tid);
+        transaction.setStatus(status);
+//        rabbitTemplate.convertAndSend(trxTopic, transaction);
     }
 
-    public void addParticipants(String tid, DistributedTransactionParticipant participant) {
-        if (!transactions.containsKey(tid)) return;
-        transactions.get(tid).getParticipants().add(participant);
+    public void addParticipants(Long tid, List<DistributedTransactionParticipantDto> participants) {
+        DistributedTrx trx = findById(tid);
+        trx.addParticipants(
+                participants.stream().map(
+                        p -> new DistributedTrxParticipant(p.getServiceId(), p.getStatus())
+                ).collect(Collectors.toList())
+        );
+        trxRepo.save(trx);
     }
 
-    public void updateParticipants(String tid, String serviceId, DistributedTransactionStatus status) {
-        if (!transactions.containsKey(tid)) return;
+    public void updateParticipants(Long tid, String serviceId, DistributedTransactionStatus status) {
+        DistributedTrxParticipant participant = participantRepo.findByTrxIdAndServiceId(tid, serviceId);
+        if (participant == null) return;
+        participant.setStatus(status);
+        participantRepo.save(participant);
 
-        for (DistributedTransactionParticipant participant : transactions.get(tid).getParticipants()) {
-            if(participant.getServiceId().equals(serviceId)) {
-                participant.setStatus(status);
-                rabbitTemplate.convertAndSend(trxTopic, transactions.get(tid));
-                return;
-            }
-        }
+//        rabbitTemplate.convertAndSend(trxTopic, tid);
     }
 
-    public Object getAll() {
-        return transactions;
+    public List<DistributedTransactionListDto> getAll() {
+        return trxRepo.findAll().stream().map(DistributedTransactionListDto::new).collect(Collectors.toList());
+    }
+
+    public boolean prepared(Long tid) {
+        return checkStatusWithTrx(tid, DistributedTransactionStatus.PREPARE);
+    }
+
+    public boolean checkCommittedById(Long tid) {
+        return checkStatusWithTrx(tid, DistributedTransactionStatus.COMMIT);
+    }
+
+    public boolean checkStatusWithTrx(Long trx, DistributedTransactionStatus status) {
+        CountByTrxAndStatusProjection cnt = participantRepo.findCountByTrxIdAndStatus(trx, status);
+        return Objects.equals(cnt.getTotal(), cnt.getStatusCount());
     }
 }

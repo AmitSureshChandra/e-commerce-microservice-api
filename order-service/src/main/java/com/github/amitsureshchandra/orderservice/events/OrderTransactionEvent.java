@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountTransactionEvent {
+public class OrderTransactionEvent {
     private String transactionId;
     private UserDto user;
 }

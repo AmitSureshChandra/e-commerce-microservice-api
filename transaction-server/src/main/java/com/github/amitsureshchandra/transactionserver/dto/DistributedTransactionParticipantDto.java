@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DistributedTransactionParticipant {
+public class DistributedTransactionParticipantDto {
     private String serviceId;
     private DistributedTransactionStatus status;
 }

@@ -1,18 +1,20 @@
 package com.github.amitsureshchandra.transactionserver.dto;
 
+import com.github.amitsureshchandra.transactionserver.entity.DistributedTrx;
 import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DistributedTransaction {
-    private String id;
+public class DistributedTransactionListDto {
+    private Long id;
     private DistributedTransactionStatus status;
 
-    private List<DistributedTransactionParticipant> participants;
+    public DistributedTransactionListDto(DistributedTrx trx) {
+        this.id = trx.getId();
+        this.status = trx.getStatus();
+    }
 }

@@ -4,6 +4,7 @@ import com.github.amitsureshchandra.orderservice.dto.*;
 import com.github.amitsureshchandra.orderservice.entity.Order;
 import com.github.amitsureshchandra.orderservice.entity.OrderItem;
 import com.github.amitsureshchandra.orderservice.enums.OrderStatus;
+import com.github.amitsureshchandra.orderservice.events.OrderTransactionEvent;
 import com.github.amitsureshchandra.orderservice.exception.ValidationException;
 import com.github.amitsureshchandra.orderservice.repo.OrderRepo;
 import org.modelmapper.ModelMapper;
@@ -73,7 +74,7 @@ public class OrderService {
             throw new ValidationException("failed to process order");
         }
 
-//        applicationEventPublisher.publishEvent(new AccountTransactionEvent());
+        applicationEventPublisher.publishEvent(new OrderTransactionEvent());
 
 //        if(new Random().nextInt() % 2 == 0)
 //            throw new OrderProcessingException("failed manually");
