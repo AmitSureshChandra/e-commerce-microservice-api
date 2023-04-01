@@ -2,6 +2,7 @@ package com.github.amitsureshchandra.accountservice.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity @Table(name = "users")
-@Data @NoArgsConstructor
+@Data @NoArgsConstructor @Audited
 public class User {
     @Id @GeneratedValue
     private Long id;

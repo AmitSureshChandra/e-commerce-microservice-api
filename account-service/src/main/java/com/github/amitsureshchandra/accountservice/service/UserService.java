@@ -20,6 +20,8 @@ public class UserService implements IBaseCRUService<User, Long, UserCreateDto, U
     final ApplicationContext applicationContext;
     final UserRepo userRepo;
 
+    private final Double defaultOpeningBalance = 1000d;
+
     public UserService(ApplicationEventPublisher eventPublisher, ApplicationContext applicationContext, UserRepo userRepo) {
         this.eventPublisher = eventPublisher;
         this.applicationContext = applicationContext;
@@ -34,28 +36,27 @@ public class UserService implements IBaseCRUService<User, Long, UserCreateDto, U
         transfer(userId, (-1) * amount, transactionId);
     }
 
+    @Override
+    public void beforeUpdate(User entity, UserUpdateDto userUpdateDto) {
+        System.out.println(entity);
+        System.out.println("here");
+    }
+
     private void transfer(Long userId, Double amount, String transactionId){
         User user = findById(userId);
         user.setBalance(user.getBalance() + amount);
         userRepo.save(user);
-        eventPublisher.publishEvent(new AccountTransactionEvent(transactionId, new UserDto(user)));
+//        eventPublisher.publishEvent(new AccountTransactionEvent(transactionId, new UserDto(user)));
+    }
+
+    @Override
+    public void beforeCreate(User entity, UserCreateDto userCreateDto) {
+        entity.setBalance(defaultOpeningBalance);
     }
 
     @Override
     public ApplicationContext getAppContext() {
         return applicationContext;
-    }
-
-    @Override
-    public User beforeUpdate(User entity, UserUpdateDto userUpdateDto) {
-
-        entity.setCity(userUpdateDto.getCity());
-        entity.setEmail(userUpdateDto.getEmail());
-        entity.setState(userUpdateDto.getState());
-        entity.setCountry(userUpdateDto.getCountry());
-        entity.setPincode(userUpdateDto.getPincode());
-
-        return userRepo.save(entity);
     }
 
     @Override
