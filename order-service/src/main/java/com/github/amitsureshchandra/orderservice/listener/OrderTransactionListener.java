@@ -32,7 +32,7 @@ public class OrderTransactionListener {
         }
 
         if(transaction == null || transaction.getStatus() != DistributedTransactionStatus.CONFIRMED)
-            throw new OrderProcessingException();
+            throw new OrderProcessingException("Some error occurred while processing");
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)

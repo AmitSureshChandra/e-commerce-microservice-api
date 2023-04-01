@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 @Service
@@ -43,6 +44,7 @@ public class OrderService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    @Transactional
     public OrderDto placeOrder(OrderReq orderReq) {
         System.out.println("here");
 
@@ -82,7 +84,7 @@ public class OrderService {
             throw new ValidationException("failed to process order");
         }
 
-//        applicationEventPublisher.publishEvent(new OrderTransactionEvent());
+        applicationEventPublisher.publishEvent(new OrderTransactionEvent());
 
 //        if(new Random().nextInt() % 2 == 0)
 //            throw new OrderProcessingException("failed manually");
