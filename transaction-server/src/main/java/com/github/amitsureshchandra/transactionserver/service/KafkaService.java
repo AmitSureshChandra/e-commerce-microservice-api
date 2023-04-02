@@ -1,6 +1,6 @@
 package com.github.amitsureshchandra.transactionserver.service;
 
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionListDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 

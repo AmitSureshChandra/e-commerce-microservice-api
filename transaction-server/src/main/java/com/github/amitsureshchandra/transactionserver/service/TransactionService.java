@@ -1,10 +1,10 @@
 package com.github.amitsureshchandra.transactionserver.service;
 
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionListDto;
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionParticipantDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionParticipantDto;
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.transactionserver.entity.DistributedTrx;
 import com.github.amitsureshchandra.transactionserver.entity.DistributedTrxParticipant;
-import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.transactionserver.exception.ValidationException;
 import com.github.amitsureshchandra.transactionserver.projection.CountByTrxAndStatusProjection;
 import com.github.amitsureshchandra.transactionserver.repo.DTrxParticipantRepo;
@@ -81,7 +81,7 @@ public class TransactionService {
     }
 
     public List<DistributedTransactionListDto> getAll() {
-        return trxRepo.findAll().stream().map(DistributedTransactionListDto::new).collect(Collectors.toList());
+        return trxRepo.findAll().stream().map(trx -> new DistributedTransactionListDto(trx.getId(), trx.getStatus())).collect(Collectors.toList());
     }
 
     public boolean prepared(Long tid) {

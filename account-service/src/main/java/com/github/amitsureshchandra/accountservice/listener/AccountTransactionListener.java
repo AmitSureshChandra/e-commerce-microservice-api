@@ -1,10 +1,10 @@
 package com.github.amitsureshchandra.accountservice.listener;
 
-import com.github.amitsureshchandra.accountservice.dto.DistributedTransactionListDto;
 import com.github.amitsureshchandra.accountservice.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.accountservice.events.AccountTransactionEvent;
 import com.github.amitsureshchandra.accountservice.exception.AccountProcessingException;
 import com.github.amitsureshchandra.accountservice.service.EventBus;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -36,7 +36,7 @@ public class AccountTransactionListener {
             }else break;
         }
 
-        if(transaction == null || transaction.getStatus() != DistributedTransactionStatus.CONFIRMED)
+        if(transaction == null || !transaction.getStatus().equals(DistributedTransactionStatus.CONFIRMED))
             throw new AccountProcessingException();
     }
 

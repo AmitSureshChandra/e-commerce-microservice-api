@@ -1,7 +1,6 @@
 package com.github.amitsureshchandra.transactionserver.entity;
 
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionParticipantDto;
-import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

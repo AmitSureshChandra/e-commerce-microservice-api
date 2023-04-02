@@ -1,8 +1,8 @@
 package com.github.amitsureshchandra.transactionserver.controller;
 
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionListDto;
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionParticipantDto;
-import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionParticipantDto;
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.transactionserver.service.CoordinatorService;
 import com.github.amitsureshchandra.transactionserver.service.TransactionService;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;

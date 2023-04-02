@@ -1,7 +1,7 @@
 package com.github.amitsureshchandra.transactionserver.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

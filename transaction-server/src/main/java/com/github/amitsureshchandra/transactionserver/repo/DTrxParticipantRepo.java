@@ -1,8 +1,8 @@
 package com.github.amitsureshchandra.transactionserver.repo;
 
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.transactionserver.projection.CountByTrxAndStatusProjection;
 import com.github.amitsureshchandra.transactionserver.entity.DistributedTrxParticipant;
-import com.github.amitsureshchandra.transactionserver.enums.DistributedTransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

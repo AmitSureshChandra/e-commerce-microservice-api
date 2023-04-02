@@ -1,6 +1,6 @@
 package com.github.amitsureshchandra.transactionserver.config;
 
-import com.github.amitsureshchandra.transactionserver.dto.DistributedTransactionListDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;

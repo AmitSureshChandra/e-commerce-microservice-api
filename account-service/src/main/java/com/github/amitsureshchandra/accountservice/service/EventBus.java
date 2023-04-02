@@ -1,7 +1,7 @@
 package com.github.amitsureshchandra.accountservice.service;
 
 import com.github.amitsureshchandra.accountservice.events.AccountTransactionEvent;
-import com.github.amitsureshchandra.accountservice.dto.DistributedTransactionListDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
