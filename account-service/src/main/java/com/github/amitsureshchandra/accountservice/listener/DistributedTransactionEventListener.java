@@ -18,9 +18,9 @@ public class DistributedTransactionEventListener {
         this.eventBus = eventBus;
     }
 
-    @RabbitListener(bindings = @QueueBinding(exchange = @Exchange(type = ExchangeTypes.TOPIC, name = "trx-events"), value = @Queue("trx-events-account")))
-    public void onMessage(DistributedTransaction transaction){
-        System.out.println("Got message : " + transaction);
-        eventBus.addTransaction(transaction);
-    }
+//    @RabbitListener(bindings = @QueueBinding(exchange = @Exchange(type = ExchangeTypes.TOPIC, name = "trx-events"), value = @Queue("trx-events-account")))
+//    public void onMessage(DistributedTransaction transaction){
+//        System.out.println("Got message : " + transaction);
+//        eventBus.addTransaction(transaction);
+//    }
 }

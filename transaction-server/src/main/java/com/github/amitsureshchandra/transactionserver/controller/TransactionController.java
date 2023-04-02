@@ -49,12 +49,12 @@ class TransactionController{
     }
 
     @PutMapping("/{tid}/finish/{status}")
-    public void finish(@PathVariable Long tid, DistributedTransactionStatus status){
+    public void finish(@PathVariable Long tid, @PathVariable DistributedTransactionStatus status){
         transactionService.finish(tid, status);
     }
 
     @PutMapping("/{tid}/participants/{serviceId}/{status}")
-    public void updateParticipants(@PathVariable Long tid,@PathVariable String serviceId,@PathVariable DistributedTransactionStatus status) {
+    public void updateParticipants(@PathVariable Long tid, @PathVariable String serviceId, @PathVariable DistributedTransactionStatus status) {
         transactionService.updateParticipants(tid, serviceId, status);
     }
 

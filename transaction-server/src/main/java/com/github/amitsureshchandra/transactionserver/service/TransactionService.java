@@ -56,7 +56,9 @@ public class TransactionService {
     public void finish(Long tid, DistributedTransactionStatus status) {
         DistributedTrx transaction = findById(tid);
         transaction.setStatus(status);
-//        rabbitTemplate.convertAndSend(trxTopic, transaction);
+        trxRepo.save(transaction);
+        System.out.println("status : " + status);
+        kafkaService.sendMessage(new DistributedTransactionListDto(transaction.getId(), transaction.getStatus()));
     }
 
     public void addParticipants(Long tid, List<DistributedTransactionParticipantDto> participants) {
