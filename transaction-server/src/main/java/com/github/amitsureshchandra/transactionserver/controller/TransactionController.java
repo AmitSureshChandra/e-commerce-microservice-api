@@ -53,8 +53,6 @@ class TransactionController{
         transactionService.finish(tid, status);
     }
 
-
-
     @PutMapping("/{tid}/participants/{serviceId}/{status}")
     public void updateParticipants(@PathVariable Long tid,@PathVariable String serviceId,@PathVariable DistributedTransactionStatus status) {
         transactionService.updateParticipants(tid, serviceId, status);

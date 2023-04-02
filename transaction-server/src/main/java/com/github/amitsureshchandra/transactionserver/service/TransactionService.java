@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionService {
     final TrxRepo trxRepo;
+    final KafkaService kafkaService;
     final DTrxParticipantRepo participantRepo;
 
     @Value("${transaction-event-topic}")
@@ -28,8 +29,9 @@ public class TransactionService {
     RabbitTemplate rabbitTemplate;
     Map<String, DistributedTransactionListDto> transactions = new HashMap<>();
 
-    public TransactionService(TrxRepo trxRepo, DTrxParticipantRepo participantRepo, RabbitTemplate rabbitTemplate) {
+    public TransactionService(TrxRepo trxRepo, KafkaService kafkaService, DTrxParticipantRepo participantRepo, RabbitTemplate rabbitTemplate) {
         this.trxRepo = trxRepo;
+        this.kafkaService = kafkaService;
         this.participantRepo = participantRepo;
         this.rabbitTemplate = rabbitTemplate;
     }
@@ -42,7 +44,9 @@ public class TransactionService {
                         p -> new DistributedTrxParticipant(p.getServiceId(), p.getStatus())
                 ).collect(Collectors.toList())
         );
-        return trxRepo.save(trx).getId();
+        trxRepo.save(trx);
+        kafkaService.sendMessage(new DistributedTransactionListDto(trx.getId(), trx.getStatus()));
+        return trx.getId();
     }
 
     public DistributedTrx findById(Long tid) {
