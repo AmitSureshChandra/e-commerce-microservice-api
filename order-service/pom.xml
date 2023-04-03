@@ -74,6 +74,14 @@
             <artifactId>jackson-databind</artifactId>
 <!--            <version>{version}</version>-->
         </dependency>
+
+        <dependency>
+            <groupId>com.github.AmitSureshchandra</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/common-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

@@ -1,8 +1,6 @@
 package com.github.amitsureshchandra.orderservice.entity;
 
-import com.github.amitsureshchandra.orderservice.convertor.ObjConverter;
-import com.github.amitsureshchandra.orderservice.dto.ItemDto;
-import com.github.amitsureshchandra.orderservice.enums.OrderStatus;
+import com.github.amitsureshchandra.common.enums.OrderStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;

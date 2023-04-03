@@ -1,10 +1,13 @@
 package com.github.amitsureshchandra.orderservice.service;
 
-import com.github.amitsureshchandra.orderservice.dto.*;
+import com.github.amitsureshchandra.common.dto.order.OrderDto;
+import com.github.amitsureshchandra.common.dto.order.OrderReq;
+import com.github.amitsureshchandra.common.dto.product.ProductDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionParticipantDto;
 import com.github.amitsureshchandra.orderservice.entity.Order;
 import com.github.amitsureshchandra.orderservice.entity.OrderItem;
-import com.github.amitsureshchandra.orderservice.enums.DistributedTransactionStatus;
-import com.github.amitsureshchandra.orderservice.enums.OrderStatus;
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
+import com.github.amitsureshchandra.common.enums.OrderStatus;
 import com.github.amitsureshchandra.orderservice.events.OrderTransactionEvent;
 import com.github.amitsureshchandra.orderservice.exception.ValidationException;
 import com.github.amitsureshchandra.orderservice.repo.OrderRepo;
@@ -92,7 +95,7 @@ public class OrderService {
         // order created
         Order order = createOrder(orderReq, cost);
 
-        return new OrderDto(order, orderReq);
+        return new OrderDto(order.getId(), orderReq.getItem(), order.getStatus());
     }
 
     private Order createOrder(OrderReq orderReq, double cost) {

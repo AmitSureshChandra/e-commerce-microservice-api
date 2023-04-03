@@ -1,8 +1,7 @@
 package com.github.amitsureshchandra.orderservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.amitsureshchandra.orderservice.dto.DistributedTransaction;
-import com.github.amitsureshchandra.orderservice.dto.DistributedTransactionParticipantDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionParticipantDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

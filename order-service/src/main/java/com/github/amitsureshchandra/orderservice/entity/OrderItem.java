@@ -1,6 +1,6 @@
 package com.github.amitsureshchandra.orderservice.entity;
 
-import com.github.amitsureshchandra.orderservice.dto.ItemDto;
+import com.github.amitsureshchandra.common.dto.order.ItemDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

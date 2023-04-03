@@ -1,7 +1,7 @@
 package com.github.amitsureshchandra.orderservice.controller;
 
-import com.github.amitsureshchandra.orderservice.dto.OrderDto;
-import com.github.amitsureshchandra.orderservice.dto.OrderReq;
+import com.github.amitsureshchandra.common.dto.order.OrderDto;
+import com.github.amitsureshchandra.common.dto.order.OrderReq;
 import com.github.amitsureshchandra.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;

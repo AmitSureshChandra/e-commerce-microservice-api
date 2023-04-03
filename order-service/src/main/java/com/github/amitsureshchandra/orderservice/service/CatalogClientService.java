@@ -1,7 +1,6 @@
 package com.github.amitsureshchandra.orderservice.service;
 
-import com.github.amitsureshchandra.orderservice.dto.DistributedTransaction;
-import com.github.amitsureshchandra.orderservice.dto.OrderReq;
+import com.github.amitsureshchandra.common.dto.order.OrderReq;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

@@ -1,7 +1,7 @@
 package com.github.amitsureshchandra.orderservice.service;
 
-import com.github.amitsureshchandra.orderservice.dto.OrderReq;
-import com.github.amitsureshchandra.orderservice.dto.ProductDto;
+import com.github.amitsureshchandra.common.dto.order.OrderReq;
+import com.github.amitsureshchandra.common.dto.product.ProductDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
