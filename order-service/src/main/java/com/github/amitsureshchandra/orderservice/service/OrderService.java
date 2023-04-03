@@ -1,138 +1,116 @@
 package com.github.amitsureshchandra.orderservice.service;
 
-import com.github.amitsureshchandra.orderservice.dto.DistributedTransaction;
-import com.github.amitsureshchandra.orderservice.dto.OrderDto;
-import com.github.amitsureshchandra.orderservice.dto.OrderReq;
-import com.github.amitsureshchandra.orderservice.dto.ProductDto;
-import com.github.amitsureshchandra.orderservice.enums.OrderStatus;
-import com.github.amitsureshchandra.orderservice.events.AccountTransactionEvent;
-import com.github.amitsureshchandra.orderservice.exception.OrderProcessingException;
+import com.github.amitsureshchandra.common.dto.account.UserDto;
+import com.github.amitsureshchandra.common.dto.order.OrderDto;
+import com.github.amitsureshchandra.common.dto.order.OrderReq;
+import com.github.amitsureshchandra.common.dto.product.ProductDto;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionParticipantDto;
+import com.github.amitsureshchandra.orderservice.entity.Order;
+import com.github.amitsureshchandra.orderservice.entity.OrderItem;
+import com.github.amitsureshchandra.common.enums.DistributedTransactionStatus;
+import com.github.amitsureshchandra.common.enums.OrderStatus;
+import com.github.amitsureshchandra.orderservice.events.OrderTransactionEvent;
 import com.github.amitsureshchandra.orderservice.exception.ValidationException;
+import com.github.amitsureshchandra.orderservice.repo.OrderRepo;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import javax.transaction.Transactional;
+import java.util.*;
 
 @Service
 public class OrderService {
+    final CatalogClientService catalogClientService;
+    final AccountClientService accountClientService;
+    final ProductClientService productClientService;
+
+    final TransactionClientService transactionClientService;
+    final OrderRepo orderRepo;
+    final ModelMapper modelMapper;
     final RestTemplate restTemplate;
 
-    private UUID buyerUserId = UUID.fromString("f0a28cb4-175b-436b-92e1-1e937736e616");
+    private final Long buyerUserId = 1l;
 
     Map<UUID, OrderDto> orders = new HashMap<>();
 
     final ApplicationEventPublisher applicationEventPublisher;
 
-    public OrderService(RestTemplate restTemplate, ApplicationEventPublisher applicationEventPublisher) {
+    public OrderService(CatalogClientService catalogClientService, AccountClientService accountClientService, ProductClientService productClientService, TransactionClientService transactionClientService, OrderRepo orderRepo, ModelMapper modelMapper, RestTemplate restTemplate, ApplicationEventPublisher applicationEventPublisher) {
+        this.catalogClientService = catalogClientService;
+        this.accountClientService = accountClientService;
+        this.productClientService = productClientService;
+        this.transactionClientService = transactionClientService;
+        this.orderRepo = orderRepo;
+        this.modelMapper = modelMapper;
         this.restTemplate = restTemplate;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    @Transactional
     public OrderDto placeOrder(OrderReq orderReq) {
+        System.out.println("here");
 
         // verify item in stock
-        if(!inStock(orderReq)) {
+        if(!catalogClientService.checkStock(orderReq)) {
             throw new ValidationException("product not in stock");
         }
 
         // verify users has coins
         // pending
 
+        List<DistributedTransactionParticipantDto> participants = new ArrayList<>();
+        participants.add(new DistributedTransactionParticipantDto("account-service", DistributedTransactionStatus.NEW));
+        participants.add(new DistributedTransactionParticipantDto("order-service", DistributedTransactionStatus.NEW));
+
         //create distributed transaction
-        DistributedTransaction transaction = restTemplate.postForObject("http://transaction-service/transactions/api/v1/transactions",
-               new DistributedTransaction(), DistributedTransaction.class);
+        Long txId = transactionClientService.createTransaction(participants);
 
-        System.out.println(transaction);
+        // add transaction to coordinate
 
-        UUID orderId = createOrder(orderReq);
+        transactionClientService.addCoordination(txId);
 
         // decrement stocks
-        assert transaction != null;
-        if(!decrementStocks(orderReq, transaction)) {
+        if(!catalogClientService.decrementStocks(orderReq, txId)) {
             // rollback transaction
             throw new ValidationException("failed to process order");
         }
+
+        ProductDto product = productClientService.getProductDetail(orderReq);
+        assert product != null;
+
+        double cost = product.getPrice() * orderReq.getItem().getQuantity();
 
         // deduct coins
-        if(!decrementAmount(orderReq, transaction, orderId)) {
+        if(!accountClientService.decrementAmount(orderReq, txId, product, cost, buyerUserId)) {
             // rollback transaction
             throw new ValidationException("failed to process order");
         }
 
-        applicationEventPublisher.publishEvent(new AccountTransactionEvent());
+        applicationEventPublisher.publishEvent(new OrderTransactionEvent(txId, null));
 
-        if(new Random().nextInt() % 2 == 0)
-            throw new OrderProcessingException("failed manually");
-
-        return orders.get(orderId);
-    }
-
-    private boolean decrementAmount(OrderReq orderReq, DistributedTransaction transaction, UUID orderId) {
-        System.out.println(" orderReq.getItem().getItemId() : " +  orderReq.getItem().getItemId());
-        ProductDto product = restTemplate.getForEntity("http://product-service/products/api/v1/products/"+ orderReq.getItem().getItemId(), ProductDto.class).getBody();
-        assert product != null;
-        double cost = product.getPrice() * orderReq.getItem().getQuantity();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Transaction-ID", transaction.getId());
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
-        System.out.println("http://account-service/users/api/v1/users/" + buyerUserId+ "/payment/"+ (int)cost);
-        restTemplate.exchange("http://account-service/users/api/v1/users/" + buyerUserId+ "/payment/"+ (int)cost, HttpMethod.PUT, httpEntity,Void.class);
-        return true;
-    }
-
-    private UUID createOrder(OrderReq orderReq) {
-        UUID oid = UUID.randomUUID();
+//        if(new Random().nextInt() % 2 == 0)
+//            throw new OrderProcessingException("failed manually");
 
         // order created
-        orders.put(oid, new OrderDto(
-                oid, orderReq.getItem(), OrderStatus.CREATED
-        ));
+        Order order = createOrder(orderReq, cost);
 
-        return oid;
+        return new OrderDto(order.getId(), orderReq.getItem(), order.getStatus());
     }
 
-    private boolean decrementStocks(OrderReq orderReq, DistributedTransaction transaction) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Transaction-ID", transaction.getId());
+    private Order createOrder(OrderReq orderReq, double cost) {
 
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+        Order order = new Order();
+        order.setAmount(cost);
+        order.setStatus(OrderStatus.CREATED);
 
-        try{
-            ResponseEntity<Void> res = restTemplate.exchange("http://catalog-service/catalogs/api/v1/catalogs/" + orderReq.getItem().getItemId()+"/DECR/" + orderReq.getItem().getQuantity(), HttpMethod.PUT, httpEntity, Void.class);
-            if(!res.getStatusCode().is2xxSuccessful()) return false;
-        }catch (RestClientException exception) {
-            System.out.println(exception.getMessage());
-            return false;
-        }
-        return true;
-    }
+        List<OrderItem> items = new ArrayList<>();
 
-    private boolean inStock(OrderReq orderReq) {
-        ResponseEntity<Integer> resp = restTemplate.exchange(
-                "http://catalog-service/catalogs/api/v1/catalogs/" + orderReq.getItem().getItemId(),
-                HttpMethod.GET,
-                null,
-                Integer.class
-        );
-
-        Integer availableStock = resp.getBody();
-        System.out.println("availableStock : " + availableStock);
-
-        if(
-                !resp.getStatusCode().is2xxSuccessful() ||
-                        availableStock == null ||
-                        availableStock < orderReq.getItem().getQuantity()
-        ) return false;
-        return true;
+        OrderItem orderItem = new OrderItem(orderReq.getItem(), cost);
+        items.add(orderItem);
+        order.addItems(items);
+        return  orderRepo.save(order);
     }
 
     public Map<UUID, OrderDto> findAll() {

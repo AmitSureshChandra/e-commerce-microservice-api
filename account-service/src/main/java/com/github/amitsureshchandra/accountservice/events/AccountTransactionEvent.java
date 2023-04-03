@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountTransactionEvent {
-    private String transactionId;
+    private Long transactionId;
     private UserDto user;
 }

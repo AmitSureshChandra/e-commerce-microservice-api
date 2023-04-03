@@ -37,13 +37,13 @@ public class UserController implements IBaseCRUController<User, Long, UserCreate
     @PutMapping("/{userId}/payment/{amount}")
     void payment(@PathVariable Long userId, @PathVariable Double amount, @RequestHeader("X-Transaction-ID") String transactionId){
         userService.payment(userId, amount, transactionId);
-        eventBus.removeEvent(transactionId);
+//        eventBus.removeEvent(transactionId);
     }
 
     @PutMapping("/{userId}/withdrawal/{amount}")
     void withdrawal(@PathVariable Long userId, @PathVariable Double amount, @RequestHeader("X-Transaction-ID") String transactionId){
         userService.withdraw(userId, amount, transactionId);
-        eventBus.removeEvent(transactionId);
+//        eventBus.removeEvent(transactionId);
     }
 
     @Override

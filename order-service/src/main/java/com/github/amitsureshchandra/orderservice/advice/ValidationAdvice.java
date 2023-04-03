@@ -1,5 +1,6 @@
 package com.github.amitsureshchandra.orderservice.advice;
 
+import com.github.amitsureshchandra.orderservice.exception.OrderProcessingException;
 import com.github.amitsureshchandra.orderservice.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,6 +12,12 @@ public class ValidationAdvice {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     String validation(ValidationException exception){
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(OrderProcessingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String validation(OrderProcessingException exception){
         return exception.getMessage();
     }
 }

@@ -1,10 +1,10 @@
 package com.github.amitsureshchandra.accountservice.listener;
 
-import com.github.amitsureshchandra.accountservice.dto.DistributedTransaction;
 import com.github.amitsureshchandra.accountservice.enums.DistributedTransactionStatus;
 import com.github.amitsureshchandra.accountservice.events.AccountTransactionEvent;
 import com.github.amitsureshchandra.accountservice.exception.AccountProcessingException;
 import com.github.amitsureshchandra.accountservice.service.EventBus;
+import com.github.amitsureshchandra.common.dto.transaction.DistributedTransactionListDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -28,16 +28,15 @@ public class AccountTransactionListener {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleEventBeforeCommit(AccountTransactionEvent event) throws InterruptedException, AccountProcessingException {
         eventBus.addEvent(event);
-        DistributedTransaction transaction = null;
-
+        DistributedTransactionListDto transaction = null;
         for (int i = 0; i < 100; i++) {
-            transaction = eventBus.removeTransaction(event.getTransactionId());
+            transaction = eventBus.getTransaction(event.getTransactionId());
             if(transaction == null) {
                 Thread.sleep(100);
             }else break;
         }
 
-        if(transaction == null || transaction.getStatus() != DistributedTransactionStatus.CONFIRMED)
+        if(transaction == null || !transaction.getStatus().equals(DistributedTransactionStatus.CONFIRMED))
             throw new AccountProcessingException();
     }
 
