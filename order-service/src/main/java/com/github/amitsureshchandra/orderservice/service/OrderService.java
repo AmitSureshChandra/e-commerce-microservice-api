@@ -1,5 +1,6 @@
 package com.github.amitsureshchandra.orderservice.service;
 
+import com.github.amitsureshchandra.common.dto.account.UserDto;
 import com.github.amitsureshchandra.common.dto.order.OrderDto;
 import com.github.amitsureshchandra.common.dto.order.OrderReq;
 import com.github.amitsureshchandra.common.dto.product.ProductDto;
@@ -61,7 +62,7 @@ public class OrderService {
 
         List<DistributedTransactionParticipantDto> participants = new ArrayList<>();
         participants.add(new DistributedTransactionParticipantDto("account-service", DistributedTransactionStatus.NEW));
-        participants.add(new DistributedTransactionParticipantDto("catalog-service", DistributedTransactionStatus.NEW));
+        participants.add(new DistributedTransactionParticipantDto("order-service", DistributedTransactionStatus.NEW));
 
         //create distributed transaction
         Long txId = transactionClientService.createTransaction(participants);
@@ -87,7 +88,7 @@ public class OrderService {
             throw new ValidationException("failed to process order");
         }
 
-        applicationEventPublisher.publishEvent(new OrderTransactionEvent());
+        applicationEventPublisher.publishEvent(new OrderTransactionEvent(txId, null));
 
 //        if(new Random().nextInt() % 2 == 0)
 //            throw new OrderProcessingException("failed manually");

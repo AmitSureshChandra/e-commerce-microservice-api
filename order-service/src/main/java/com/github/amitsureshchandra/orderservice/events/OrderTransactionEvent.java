@@ -1,6 +1,6 @@
 package com.github.amitsureshchandra.orderservice.events;
 
-import com.github.amitsureshchandra.orderservice.dto.UserDto;
+import com.github.amitsureshchandra.common.dto.account.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderTransactionEvent {
-    private String transactionId;
+    private Long transactionId;
     private UserDto user;
 }
